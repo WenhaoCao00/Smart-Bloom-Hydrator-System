@@ -1,2 +1,0 @@
-mosquitto_sub -t test_sensor_data -h localhost
-mosquitto_pub -t test_sensor_data -h localhost -m "temp:300"
