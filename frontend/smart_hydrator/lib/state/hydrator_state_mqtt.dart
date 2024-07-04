@@ -90,7 +90,7 @@ final hydratorProvider =
 // MQTT 服务
 class MQTTService {
   final Ref ref;
-  final client = MqttServerClient('localhost', '');
+  final client = MqttServerClient('192.168.0.103', '');
 
   MQTTService(this.ref) {
     _setupClient();
@@ -120,7 +120,7 @@ class MQTTService {
     try {
       await client.connect();
     } catch (e) {
-      developer.log('Exception: $e');
+      print('Exception: $e');
       client.disconnect();
       return;
     }
@@ -159,8 +159,9 @@ class MQTTService {
     final data = jsonDecode(payload);
 
     if (topic == 'test_sensor_data') {
-      final sensorData = SensorData.fromJson(data);
-      ref.read(hydratorProvider.notifier).updateSensorData(sensorData);
+      // final sensorData = SensorData.fromJson(data);
+      // ref.read(hydratorProvider.notifier).updateSensorData(sensorData);
+      developer.log('Received sensor data: $data');
     }
   }
 

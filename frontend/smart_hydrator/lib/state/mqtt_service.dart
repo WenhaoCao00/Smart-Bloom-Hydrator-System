@@ -6,8 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'hydrator_state.dart';
 import 'hydrator_state_mqtt.dart';
 import 'dart:io';
+import 'dart:developer' as developer;
 
-final client = MqttServerClient('localhost', ''); //add address
+final client = MqttServerClient("192.168.0.103", '');
 
 class MQTTService {
   final WidgetRef ref;
@@ -30,12 +31,13 @@ class MQTTService {
 
   Future<void> connect() async {
     final connMess = MqttConnectMessage()
-        .withClientIdentifier('Mqtt_MyClientUniqueId')
+        .withClientIdentifier('cliendId')
         .withWillTopic('willtopic')
         .withWillMessage('My Will message')
         .startClean()
         .withWillQos(MqttQos.atLeastOnce);
 
+    developer.log('This is a log message');
     print('Connecting to MQTT broker...');
     client.connectionMessage = connMess;
 
@@ -62,7 +64,7 @@ class MQTTService {
 
   void _subscribeToTopics() {
     print('Subscribing to topics...');
-    client.subscribe('sensor_data', MqttQos.atMostOnce);
+    client.subscribe('test_sensor_data', MqttQos.atMostOnce);
     client.subscribe('weather_data', MqttQos.atMostOnce);
 
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
