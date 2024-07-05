@@ -31,12 +31,9 @@ def on_message(client, userdata, msg):
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
-# 发布消息
-def publish(topic, payload):
-    client.publish(topic, payload)
     
 # 连接到本地MQTT Broker
-client.connect("localhost", 1883, 60)
+client.connect_async("192.168.0.106", 1883, 60)
 
 # 启动客户端
 client.loop_start()

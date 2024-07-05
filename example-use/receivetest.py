@@ -2,6 +2,9 @@ import paho.mqtt.client as mqtt
 import json
 import time
 
+    #data = json.loads(msg.payload.decode())
+
+
 # 回调函数 - 当连接到服务器时调用
 def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {rc}")
@@ -11,7 +14,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print(f"Topic: {msg.topic} Message: {msg.payload.decode()}")
     # 解析JSON数据
-    data = json.loads(msg.payload.decode())
+    #data = json.loads(msg.payload.decode())
+    data = msg.payload.decode()
     print("Received data:", data)
 
 client = mqtt.Client()
