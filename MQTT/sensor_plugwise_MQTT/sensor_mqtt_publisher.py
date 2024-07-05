@@ -26,7 +26,7 @@ client.on_connect = on_connect
 #client.on_message = on_message
 
 # 连接到本地MQTT Broker
-client.connect("localhost", 1883, 60)
+client.connect_async("192.168.0.106", 1883, 60)
 
 # 发布消息
 def publish(topic, payload):
@@ -42,7 +42,8 @@ logging.basicConfig(level=logging.INFO)
 
 device_name = "/dev/ttyACM0"
 
-options = ZWaveOption(device_name, config_path="/home/pi/iot-ws/openzwave/config", user_path=".")
+options = ZWaveOption(device_name, config_path="/home/pi/python-openzwave/openzwave/config", user_path=".")
+
 options.set_console_output(False)
 options.lock()
 
@@ -67,8 +68,11 @@ while True:
         for val in network.nodes[node].get_sensors():
             label = network.nodes[node].values[val].label
             data = network.nodes[node].values[val].data
-            if label in ["Air Temperature", "Illuminance","Humidity", "Ultraviolet"]:
+            if label in ["Air Temperature", "Illuminance", "Humidity", "Ultraviolet"]:
+                if label == "Air Temperature":
+                    data = round(data, 1)  # 保留一位小数
                 publish_content[label] = data
+
 
     
     dump_data = json.dumps(publish_content)
