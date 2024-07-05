@@ -193,7 +193,5 @@ function updateDisplay(data) {
   document.getElementById(
     "humidityValue"
   ).textContent = `${data["Humidity"]} %`;
-  document.getElementById(
-    "uvValue"
-  ).textContent = `${data["Ultraviolet"]} mW/cm²`;
+  document.getElementById("uvValue").textContent = `${data["Ultraviolet"]} UV`;
 }
