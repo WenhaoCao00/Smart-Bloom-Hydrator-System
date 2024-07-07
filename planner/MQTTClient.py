@@ -38,6 +38,12 @@ class Listener:
         self.mqtt_subscriber.on_message = self.on_message
         self.mqtt_subscriber.on_connect = self.on_connect
 
+    def set_function(self, func_type, func):
+        if func_type == "on_message":
+            self.mqtt_subscriber.on_message = func
+        elif func_type == "on_connect":
+            self.mqtt_subscriber.on_connect = func
+
     def on_message(self, client, userdata, message):
         print('Message topic {}'.format(message.topic))
         print('Message payload:')

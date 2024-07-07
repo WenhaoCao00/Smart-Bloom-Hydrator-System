@@ -10,23 +10,25 @@ class SmartBloomProblem(SmartBloomSystem):
         self.temperatures = SmartBloomSystem.Temp.create_objs([1], prefix="t")
         self.moistures = SmartBloomSystem.Moisture.create_objs([1], prefix="m")
 
-    @init
-    def init(self):
-        at = [
+        self._init_list = [
             # ~self.light_on(self.lights[1]), # no need to specify
             self.lightTime_is_enough(self.lightTimes[1]),
             self.moisture_is_low(self.moistures[1]),
             self.temp_is_ok(self.temperatures[1])
         ]
-
-        return at
-    
-    @goal
-    def goal(self):
-        return [
+        self._goal_list = [
+            self.lightTime_is_enough(self.lightTimes[1]),
             self.temp_is_ok(self.temperatures[1]),
             self.moisture_is_ok(self.moistures[1]),
         ]
+
+    @init
+    def init(self):
+        return self._init_list
+    
+    @goal
+    def goal(self):
+        return self._goal_list
     
 if __name__ == "__main__":
     pb = SmartBloomProblem()
