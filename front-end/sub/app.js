@@ -17,7 +17,6 @@ window.addEventListener("load", (event) => {
 function connectToBroker() {
   const clientId = "client" + Math.random().toString(36).substring(7);
 
-  // Change this to point to your MQTT broker
   const host = "ws://192.168.0.100:8080";
 
   const options = {
@@ -58,7 +57,7 @@ function connectToBroker() {
 
 function subscribeToTopic() {
   const status = document.querySelector("#status");
-  const topic = "sensor_data"; // Adjust this to your topic
+  const topic = "sensor_data";
   console.log(`Subscribing to Topic: ${topic}`);
 
   mqttClient.subscribe(topic, { qos: 0 });
@@ -68,7 +67,7 @@ function subscribeToTopic() {
 
 function unsubscribeToTopic() {
   const status = document.querySelector("#status");
-  const topic = "sensor_data"; // Adjust this to your topic
+  const topic = "sensor_data";
   console.log(`Unsubscribing to Topic: ${topic}`);
 
   mqttClient.unsubscribe(topic, { qos: 0 });
