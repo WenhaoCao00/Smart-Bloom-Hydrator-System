@@ -1,0 +1,38 @@
+import paho.mqtt.client as mqtt
+
+# 回调函数 - 当连接到服务器时调用
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+    client.subscribe("sensor_data")
+
+# 回调函数 - 当收到消息时调用
+def on_message(client, userdata, msg):
+    print(f"Topic: {msg.topic} Message: {msg.payload.decode()}")
+
+client = mqtt.Client()
+client.on_connect = on_connect
+#client.on_message = on_message
+print("conn before")
+# 连接到本地MQTT Broker
+client.connect_async('192.168.0.106', 1883, 60)
+print("conn_after")
+# 发布消息
+def publish(topic, payload):
+    client.publish(topic, payload)
+
+# 启动客户端
+client.loop_start()
+
+# 发布测试消息
+import time
+data = {"Air Temperature": 10, "Illuminance": 15, "Humidity": 12, "Ultraviolet": 10}
+#data to a json
+import json
+data = json.dumps(data)
+while True:
+    print("before publish")
+    publish("sensor_data", data)
+    print("after publish")
+    time.sleep(10)
+
+

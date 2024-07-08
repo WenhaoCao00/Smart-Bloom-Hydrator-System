@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-time Greenhouse Sensor Data</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- the chart.js is the external resource for the the chart making -->
+    <script src="../libs/chart.js"></script> 
+    <script src="../libs/mqtt.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Real-time Greenhouse Sensor Data</h1>
+      <div class="controls">
+        <button id="subscribeBtn">Subscribe</button>
+        <button id="unsubscribeBtn">Unsubscribe</button>
+    </div>
+    <div class="status-container">
+        <label for="status">Status</label>
+        <div id="status" class="status">UNSUBSCRIBED</div>
+    </div>
+
+    <div class >
+      <div class="data-display">
+        <div class="data-item">
+          <h2>Air Temperature</h2>
+          <p id="airTempValue">-- °C</p>
+        </div>
+        <div class="data-item">
+          <h2>Illuminance</h2>
+          <p id="illuminanceValue">-- lux</p>
+        </div>
+        <div class="data-item">
+          <h2>Humidity</h2>
+          <p id="humidityValue">-- %</p>
+        </div>
+        <div class="data-item">
+          <h2>Ultraviolet</h2>
+          <p id="uvValue">-- UV</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="temperatureChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="illuminanceChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="humidityChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="uvChart"></canvas>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
