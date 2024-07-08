@@ -10,7 +10,7 @@ class SunRiseAPI:
     def __init__(self, lat, lng, db_name, timezone_shift=2) -> None:
         self.lat = lat
         self.lng = lng
-        self.timezone = 2
+        self.timezone = timezone_shift
 
         self.db_name = db_name
         self.conn = None
