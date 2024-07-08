@@ -20,10 +20,13 @@ class SunRiseAPI:
         self.cur = self.conn.cursor()
 
     def get_sunrise(self):
-        r = requests.get(sunrise_url, params={"lat":self.lat, "lng":self.lng})
-        if r.status_code == 200:
-            return json.loads(r.text)
-        else:
+        try:
+            r = requests.get(sunrise_url, params={"lat":self.lat, "lng":self.lng}, timeout=15)
+            if r.status_code == 200:
+                return json.loads(r.text)
+            else:
+                return None
+        except:
             return None
         
     def parse_sun_string_to_datetime(self, s_string):
@@ -51,21 +54,22 @@ class SunRiseAPI:
             if len(result) == 0:
                 # if no today's data, get one and write to db
                 sunrise_data = self.get_sunrise()
-                sunrise = sunrise_data["results"]["sunrise"]
-                sunrise = self.parse_sun_string_to_datetime(sunrise)
-                rise_str = sunrise.strftime("%H:%M:%S")
-                sunset = sunrise_data["results"]["sunset"]
-                sunset = self.parse_sun_string_to_datetime(sunset)
-                set_str = sunset.strftime("%H:%M:%S")
+                if sunrise_data is not None:
+                    sunrise = sunrise_data["results"]["sunrise"]
+                    sunrise = self.parse_sun_string_to_datetime(sunrise)
+                    rise_str = sunrise.strftime("%H:%M:%S")
+                    sunset = sunrise_data["results"]["sunset"]
+                    sunset = self.parse_sun_string_to_datetime(sunset)
+                    set_str = sunset.strftime("%H:%M:%S")
 
-                sql_cmd = """
-                INSERT INTO sunrise VALUES (?, ?, ?);
-                """
-                print("sql_cmd: {}".format(sql_cmd))
-                self.cur.executemany(sql_cmd, [(today_datestring, rise_str, set_str)])
-                self.conn.commit()
+                    sql_cmd = """
+                    INSERT INTO sunrise VALUES (?, ?, ?);
+                    """
+                    print("sql_cmd: {}".format(sql_cmd))
+                    self.cur.executemany(sql_cmd, [(today_datestring, rise_str, set_str)])
+                    self.conn.commit()
                 
-            time.sleep(5)
+            time.sleep(20)
 
 if __name__ == "__main__":
     sun_api = SunRiseAPI(48.74527114926762, 9.1062779405148, "store.db")

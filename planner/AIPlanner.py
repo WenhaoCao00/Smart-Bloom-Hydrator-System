@@ -182,11 +182,9 @@ class AIPlanner:
         if self.sunrise_data_date == today_datestring:
             return 
         self.sunrise_data_date, self.sunrise_time, self.sunset_time = self.db_handler.get_today_sun_data()
-        if self.sunrise_data_date is None:
-            return True # if no data, assume the light time is enough
-
-        if now_time > self.sunrise_time and now_time < self.sunset_time:
-            return True # if there is sun light, no need to consider light time
+        if self.sunrise_data_date is not None:
+            if now_time > self.sunrise_time and now_time < self.sunset_time:
+                return True # if there is sun light, no need to consider light time
         
         if self.accummulate_light_time > enough_light_time:
             return True
