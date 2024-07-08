@@ -7,9 +7,10 @@ import datetime
 sunrise_url = "https://api.sunrise-sunset.org/json"
 
 class SunRiseAPI:
-    def __init__(self, lat, lng, db_name) -> None:
+    def __init__(self, lat, lng, db_name, timezone_shift=2) -> None:
         self.lat = lat
         self.lng = lng
+        self.timezone = 2
 
         self.db_name = db_name
         self.conn = None
@@ -26,14 +27,16 @@ class SunRiseAPI:
             return None
         
     def parse_sun_string_to_datetime(self, s_string):
-        add_hour = 0
+        add_hour = self.timezone
         if "PM" in s_string:
-            add_hour = 12
+            add_hour += 12
 
         time_string = s_string.split(" ")[0]
         s_time = datetime.datetime.strptime(time_string, "%H:%M:%S")
         if add_hour > 0:
             return_time = s_time + datetime.timedelta(hours=add_hour)
+        elif add_hour < 0:
+            return_time = s_time - datetime.timedelta(hours=abs(add_hour))
         else:
             return_time = s_time
         return return_time
