@@ -32,6 +32,18 @@ class DB_handler:
             result[key] = list_data[i]
         
         return result
+    
+    def get_today_sun_data(self):
+        # get database
+        today_datestring = datetime.datetime.now().strftime("%d.%m.%Y")
+        sql_cmd = """SELECT * FROM sunrise WHERE date = '{}';""".format(today_datestring)
+        res = self.cur.execute(sql_cmd)
+        result = res.fetchall()
+        if len(result) > 0:
+            db_data = result[0]
+            return today_datestring, datetime.datetime.strptime("{} {}".format(today_datestring, db_data[1]), "%d.%m.%Y %H:%M:%S"), datetime.datetime.strptime("{} {}".format(today_datestring, db_data[2]), "%d.%m.%Y %H:%M:%S")
+        else:
+            return None, None, None
 
 class AIPlanner:
     def __init__(self, sensor_topic, actuator_topic) -> None:
@@ -115,7 +127,7 @@ class AIPlanner:
                     if self.sunrise_data_date is not None:
                         if now > self.sunrise_time and now < self.sunset_time:
                             add_flag = True
-                    if add_flag:
+                    if add_flag and self.last_light_time is not None:
                         self.accummulate_light_time = int((now - self.last_light_time).total_seconds() / 60)
 
                     # convert to message format for MQTT
@@ -150,29 +162,13 @@ class AIPlanner:
                     self.send_cmd_publisher.publish(self.actuator_topic, msg)
                     print("actuator publish: {}".format(msg))
 
-                
-    
-    def get_today_sun_data(self):
-        # get database
-        today_datestring = datetime.datetime.now().strftime("%d.%m.%Y")
-        if self.sunrise_data_date == today_datestring:
-            return 
-        sql_cmd = """SELECT * FROM sunrise WHERE date = '{}';""".format(today_datestring)
-        res = self.cur.execute(sql_cmd)
-        result = res.fetchall()
-        if len(result) > 0:
-            db_data = result[0]
-            self.sunrise_data_date = today_datestring
-            self.sunrise_time = datetime.datetime.strptime("{} {}".format(today_datestring, db_data[1]), "%d.%m.%Y %H:%M:%S")
-            self.sunset_time = datetime.datetime.strptime("{} {}".format(today_datestring, db_data[2]), "%d.%m.%Y %H:%M:%S")
-        else:
-            self.sunrise_data_date = None
-            self.sunrise_time = None
-            self.sunset_time = None
         
     def check_lightTime_enough_or_not_for_init_state(self):
         now_time = datetime.datetime.now()
-        self.get_today_sun_data()
+        today_datestring = now_time.strftime("%d.%m.%Y")
+        if self.sunrise_data_date == today_datestring:
+            return 
+        self.sunrise_data_date, self.sunrise_time, self.sunset_time = self.db_handler.get_today_sun_data()
         if self.sunrise_data_date is None:
             return True # if no data, assume the light time is enough
 
@@ -220,17 +216,17 @@ class AIPlanner:
                 self.pddl_pb._init_list.append(self.pddl_pb.lightTime_is_enough(self.pddl_pb.lightTimes[1]))
             
             sensor_temp = data["Air Temperature"]
-            if sensor_temp > self.config["max_temp"]:
+            if sensor_temp > float(self.config["max_temp"]):
                 self.pddl_pb._init_list.append(self.pddl_pb.temp_is_high(self.pddl_pb.temperatures[1]))
-            elif sensor_temp > self.config["min_temp"]:
+            elif sensor_temp > float(self.config["min_temp"]):
                 self.pddl_pb._init_list.append(self.pddl_pb.temp_is_ok(self.pddl_pb.temperatures[1]))
             else:
                 self.pddl_pb._init_list.append(self.pddl_pb.temp_is_low(self.pddl_pb.temperatures[1]))
 
             sensor_mois = data["Humidity"]
-            if sensor_mois > self.config["max_mois"]:
+            if sensor_mois > float(self.config["max_mois"]):
                 self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_high(self.pddl_pb.moistures[1]))
-            elif sensor_mois > self.config["min_mois"]:
+            elif sensor_mois > float(self.config["min_mois"]):
                 self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_ok(self.pddl_pb.moistures[1]))
             else:
                 self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_low(self.pddl_pb.moistures[1]))

@@ -32,7 +32,11 @@ class SunRiseAPI:
 
         time_string = s_string.split(" ")[0]
         s_time = datetime.datetime.strptime(time_string, "%H:%M:%S")
-        return s_time
+        if add_hour > 0:
+            return_time = s_time + datetime.timedelta(hours=add_hour)
+        else:
+            return_time = s_time
+        return return_time
         
     def run(self):
         while True:
