@@ -18,7 +18,7 @@ function connectToBroker() {
   const clientId = "client" + Math.random().toString(36).substring(7);
 
   // Change this to point to your MQTT broker
-  const host = "ws://192.168.0.106:8080";
+  const host = "ws://192.168.0.100:8080";
 
   const options = {
     keepalive: 60,

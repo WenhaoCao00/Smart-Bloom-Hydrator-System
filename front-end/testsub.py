@@ -14,7 +14,7 @@ client.on_connect = on_connect
 #client.on_message = on_message
 
 # 连接到本地MQTT Broker
-client.connect('192.168.0.102', 1883, 60)
+client.connect('192.168.0.106', 1883, 60)
 
 # 发布消息
 def publish(topic, payload):
