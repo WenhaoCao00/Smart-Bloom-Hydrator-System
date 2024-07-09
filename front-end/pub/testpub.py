@@ -25,10 +25,13 @@ client.loop_start()
 
 # 发布测试消息
 import time
-data = {"table_name": "config", "data": [{"id": 2, "name": "sensor_data", "value": "1,2,3,4,5,6,7,8,9,10", "time": "2021-06-01 00:00:00"}, {"id": 2, "name": "sensor_data", "value": "1,2,3,4,5,6,7,8,9,10", "time": "2021-06-01 00:00:00"}]}
+config_d = {"max_temp":27, "min_temp":22, "max_mois":40, "min_mois":20, "enough_light_time":16*60, "single_water_time":0.1, "single_light_time":30, "trigger_period":60}
+data = {"table_name": "config", "data": [config_d]}
+
 #data to a json
 import json
 data = json.dumps(data)
+
 while True:
 
     publish("db_data", data)

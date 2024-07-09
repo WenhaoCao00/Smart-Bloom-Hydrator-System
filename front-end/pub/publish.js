@@ -100,6 +100,13 @@ function connectToBroker() {
       dataList.forEach((dataItem, index) => {
         messageTextArea.value += `Data ${index + 1}:\n`;
         for (const [key, value] of Object.entries(dataItem)) {
+          if (tableName === "config") {
+            const inputElement = document.querySelector(`#${key}`);
+            if (inputElement) {
+              inputElement.value = value;
+            }
+          }
+
           if (key === "id") {
             continue;
           } else {
