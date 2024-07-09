@@ -55,11 +55,17 @@
         </div>
         <!-- lower-right -->
         <div class="lower-right">
+          <style>
+            input::placeholder {
+                font-size: 15px;
+                color: #888; 
+            }
+        </style>
           <h1>Record History</h1>
           <ul class="wrapper">
             <li class="form-row">
               <label for="payload">Payload</label>
-              <input type="text" id="payload" />
+              <input type="text" id="payload" placeholder="config, actuator_record, sensor_record, sunrise" />
             </li>
             <li class="form-row">
               <label for="message">Record</label>

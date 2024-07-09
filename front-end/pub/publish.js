@@ -9,23 +9,36 @@ window.addEventListener("load", (event) => {
   });
 
   document.querySelector("#circleOnBtn").addEventListener("click", function () {
+    // write a alert to confirm the action
+    if (!confirm("Are you sure you want to turn on the light?")) {
+      return;
+    }
     publishCircle("circle_on");
   });
   document
     .querySelector("#circleOffBtn")
     .addEventListener("click", function () {
+      if (!confirm("Are you sure you want to turn off the light?")) {
+        return;
+      }
       publishCircle("circle_off");
     });
 
   document
     .querySelector("#circlePlusOnBtn")
     .addEventListener("click", function () {
+      if (!confirm("Are you sure you want to turn on the watering?")) {
+        return;
+      }
       publishCircle("circle_plus_on");
     });
 
   document
     .querySelector("#circlePlusOffBtn")
     .addEventListener("click", function () {
+      if (!confirm("Are you sure you want to turn off the watering?")) {
+        return;
+      }
       publishCircle("circle_plus_off");
     });
 
