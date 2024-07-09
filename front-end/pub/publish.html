@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Publish Configuration</title>
+    <link rel="stylesheet" href="publish.css" />
+    <script src="../libs/mqtt.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="left-panel">
+        <h1>Update Configuration</h1>
+        <div class="config-form">
+          <label for="max_temp">Max Temperature (°C):</label>
+          <input type="number" id="max_temp" name="max_temp" />
+          <label for="min_temp">Min Temperature (°C):</label>
+          <input type="number" id="min_temp" name="min_temp" />
+          <label for="max_mois">Max Moisture (%):</label>
+          <input type="number" id="max_mois" name="max_mois" />
+          <label for="min_mois">Min Moisture (%):</label>
+          <input type="number" id="min_mois" name="min_mois" />
+          <label for="enough_light_time">Enough Light Time (mins):</label>
+          <input
+            type="number"
+            id="enough_light_time"
+            name="enough_light_time"
+          />
+          <label for="single_water_time">Single Water Time (mins):</label>
+          <input
+            type="number"
+            id="single_water_time"
+            name="single_water_time"
+          />
+          <label for="single_light_time">Single Light Time (mins):</label>
+          <input
+            type="number"
+            id="single_light_time"
+            name="single_light_time"
+          />
+          <label for="trigger_period">Trigger Period (mins):</label>
+          <input type="number" id="trigger_period" name="trigger_period" />
+          <button id="publishBtn">Update</button>
+        </div>
+        <!-- <div id="status" class="status"></div> -->
+      </div>
+      <div class="right-panel">
+        <!-- right part of publish page -->
+        <div class="upper-right">
+          <h1>Plugwise Control</h1>
+          <button id="circleOnBtn">Circle On</button>
+          <button id="circleOffBtn">Circle Off</button>
+          <button id="circlePlusOnBtn">Circle+ On</button>
+          <button id="circlePlusOffBtn">Circle+ Off</button>
+        </div>
+        <!-- lower-right -->
+        <div class="lower-right">
+          <style>
+            input::placeholder {
+                font-size: 15px;
+                color: #888; 
+            }
+        </style>
+          <h1>Record History</h1>
+          <ul class="wrapper">
+            <li class="form-row">
+              <label for="payload">Payload</label>
+              <input type="text" id="payload" placeholder="config, actuator_record, sensor_record, sunrise" />
+            </li>
+            <li class="form-row">
+              <label for="message">Record</label>
+              <textarea id="message" name="message" rows="10" readonly></textarea>
+            </li>
+            <li class="form-row">
+              <label for="status">Status</label>
+              <input type="text" id="status" readonly />
+            </li>
+            <li class="form-row">
+              <div class="btn-container">
+                <button type="button" id="subscribe">Subscribe</button>
+                <button type="button" id="unsubscribe">Unsubscribe</button>
+              </div>
+            </li>
+        </div>
+      </div>
+    </div>
+    <script src="publish.js"></script>
+  </body>
+</html>
