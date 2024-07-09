@@ -11,8 +11,8 @@ table_column_dict = {
 
 class DBHandler:
     def __init__(self, db_name, sensor_topic, actuator_topic, config_topic, get_data_topic, return_data_topic) -> None:
-        self.mqtt_client = Listener("db_handler")
-        self.mqtt_publisher = Publisher("gd_handler_sender")
+        self.mqtt_client = Listener("db_handler", "")
+        self.mqtt_publisher = Publisher("gd_handler_sender", "")
         self.sensor_topic = sensor_topic
         self.actuator_topic = actuator_topic
         self.config_topic = config_topic

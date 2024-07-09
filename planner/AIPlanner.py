@@ -47,7 +47,7 @@ class DB_handler:
 
 class AIPlanner:
     def __init__(self, sensor_topic, actuator_topic, config_topic) -> None:
-        self.mqtt_client = Listener("AIPlanner")
+        self.mqtt_client = Listener("AIPlanner", "")
         self.sensor_topic = sensor_topic
         self.actuator_topic = actuator_topic
         self.config_topic = config_topic
@@ -62,7 +62,7 @@ class AIPlanner:
         self.last_light_cmd = None
         self.water_cmd_buffer_lock = Lock()
         self.water_cmd_buffer = []
-        self.send_cmd_publisher = Publisher("AIPlanner_pub")
+        self.send_cmd_publisher = Publisher("AIPlanner_pub", "")
         self.last_water_time = None
         self.thread_terminate_flag = False
 
@@ -215,7 +215,7 @@ class AIPlanner:
 
 
     def run_pyper_plan(self):
-        process = subprocess.Popen(['/opt/homebrew/anaconda3/envs/sciot-env/bin/pyperplan', 'domain.pddl', 'problem.pddl'],
+        process = subprocess.Popen(['python3', '/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/pyperplan/__main__.py', 'domain.pddl', 'problem.pddl'],
                      stdout=subprocess.PIPE, 
                      stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
@@ -223,80 +223,84 @@ class AIPlanner:
 
     def on_message(self, client, userdata, message):
         print("receive!")
-        if message.topic == self.config_topic:
-            self.config_lock.acquire()
-            self.config = self.db_handler.get_config()
-            self.config_lock.release()
-            print("Updated config: {}".format(json.dumps(self.config, indent=4)))
-        elif message.topic == self.sensor_topic:
-            data = json.loads(message.payload.decode())
-            if self.check_trigger_or_not():
-                # generate init statement
-                self.pddl_pb._init_list = [self.pddl_pb.light_is_off(self.pddl_pb.lights[1])]
-                # generate light condition
-                if self.check_lightTime_enough_or_not_for_init_state(data["Illuminance"]):
-                    self.pddl_pb._init_list.append(self.pddl_pb.lightTime_is_enough(self.pddl_pb.lightTimes[1]))
-                
-                sensor_temp = data["Air Temperature"]
-                if sensor_temp > float(self.config["max_temp"]):
-                    self.pddl_pb._init_list.append(self.pddl_pb.temp_is_high(self.pddl_pb.temperatures[1]))
-                elif sensor_temp > float(self.config["min_temp"]):
-                    self.pddl_pb._init_list.append(self.pddl_pb.temp_is_ok(self.pddl_pb.temperatures[1]))
-                else:
-                    self.pddl_pb._init_list.append(self.pddl_pb.temp_is_low(self.pddl_pb.temperatures[1]))
+        try:
+            if message.topic == self.config_topic:
+                time.sleep(3)
+                self.config_lock.acquire()
+                self.config = self.db_handler.get_config()
+                self.config_lock.release()
+                print("Updated config: {}".format(json.dumps(self.config, indent=4)))
+            elif message.topic == self.sensor_topic:
+                data = json.loads(message.payload.decode())
+                if self.check_trigger_or_not():
+                    # generate init statement
+                    self.pddl_pb._init_list = [self.pddl_pb.light_is_off(self.pddl_pb.lights[1])]
+                    # generate light condition
+                    if self.check_lightTime_enough_or_not_for_init_state(data["Illuminance"]):
+                        self.pddl_pb._init_list.append(self.pddl_pb.lightTime_is_enough(self.pddl_pb.lightTimes[1]))
+                    
+                    sensor_temp = data["Air Temperature"]
+                    if sensor_temp > float(self.config["max_temp"]):
+                        self.pddl_pb._init_list.append(self.pddl_pb.temp_is_high(self.pddl_pb.temperatures[1]))
+                    elif sensor_temp > float(self.config["min_temp"]):
+                        self.pddl_pb._init_list.append(self.pddl_pb.temp_is_ok(self.pddl_pb.temperatures[1]))
+                    else:
+                        self.pddl_pb._init_list.append(self.pddl_pb.temp_is_low(self.pddl_pb.temperatures[1]))
 
-                sensor_mois = data["Humidity"]
-                if sensor_mois > float(self.config["max_mois"]):
-                    self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_high(self.pddl_pb.moistures[1]))
-                elif sensor_mois > float(self.config["min_mois"]):
-                    self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_ok(self.pddl_pb.moistures[1]))
-                else:
-                    self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_low(self.pddl_pb.moistures[1]))
+                    sensor_mois = data["Humidity"]
+                    if sensor_mois > float(self.config["max_mois"]):
+                        self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_high(self.pddl_pb.moistures[1]))
+                    elif sensor_mois > float(self.config["min_mois"]):
+                        self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_ok(self.pddl_pb.moistures[1]))
+                    else:
+                        self.pddl_pb._init_list.append(self.pddl_pb.moisture_is_low(self.pddl_pb.moistures[1]))
 
-                self.pddl_pb.generate_domain_pddl()
-                self.pddl_pb.generate_problem_pddl()
+                    self.pddl_pb.generate_domain_pddl()
+                    self.pddl_pb.generate_problem_pddl()
 
-                self.run_pyper_plan()
+                    self.run_pyper_plan()
 
-                # check if there is solution file or not
-                now_path = pathlib.Path().resolve()
-                file_list  = [f for f in listdir(now_path) if isfile(join(now_path, f))]
-                solution = None
-                if "problem.pddl.soln" in file_list:
-                    solution_path = os.path.join(now_path, "problem.pddl.soln")
-                    with open(solution_path, 'r')as f:
-                        solution = f.readlines()
-                    os.remove(solution_path)
-                    print(solution)
-                else:
-                    print("No solution file")
+                    # check if there is solution file or not
+                    now_path = pathlib.Path().resolve()
+                    file_list  = [f for f in listdir(now_path) if isfile(join(now_path, f))]
+                    solution = None
+                    if "problem.pddl.soln" in file_list:
+                        solution_path = os.path.join(now_path, "problem.pddl.soln")
+                        with open(solution_path, 'r')as f:
+                            solution = f.readlines()
+                        os.remove(solution_path)
+                        print(solution)
+                    else:
+                        print("No solution file")
 
-                if solution != None:
-                    self.set_last_trigger_time()
-                    # stored into sending buffer
-                    has_light_flag = False
-                    for single_cmd in solution:
-                        if "light-on" in single_cmd:
-                            self.light_cmd_buffer_lock.acquire()
-                            self.light_cmd_buffer.append("on")
-                            self.light_cmd_buffer_lock.release()
-                            has_light_flag = True
-                        elif "light-off" in single_cmd or "light-keep-off" in single_cmd:
+                    if solution != None:
+                        self.set_last_trigger_time()
+                        # stored into sending buffer
+                        has_light_flag = False
+                        for single_cmd in solution:
+                            if "light-on" in single_cmd:
+                                self.light_cmd_buffer_lock.acquire()
+                                self.light_cmd_buffer.append("on")
+                                self.light_cmd_buffer_lock.release()
+                                has_light_flag = True
+                            elif "light-off" in single_cmd or "light-keep-off" in single_cmd:
+                                self.light_cmd_buffer_lock.acquire()
+                                self.light_cmd_buffer.append("off")
+                                self.light_cmd_buffer_lock.release()
+                                has_light_flag = True
+                            elif "water" in single_cmd:
+                                self.water_cmd_buffer_lock.acquire()
+                                self.water_cmd_buffer.append("on")
+                                self.water_cmd_buffer.append("off")
+                                self.water_cmd_buffer_lock.release()
+                        
+                        if not has_light_flag:
+                            # if there is no light command from AIPlanner, turn off the light to match the assumption
                             self.light_cmd_buffer_lock.acquire()
                             self.light_cmd_buffer.append("off")
                             self.light_cmd_buffer_lock.release()
-                            has_light_flag = True
-                        elif "water" in single_cmd:
-                            self.water_cmd_buffer_lock.acquire()
-                            self.water_cmd_buffer.append("on")
-                            self.water_cmd_buffer.append("off")
-                            self.water_cmd_buffer_lock.release()
-                    
-                    if not has_light_flag:
-                        # if there is no light command from AIPlanner, turn off the light to match the assumption
-                        self.light_cmd_buffer_lock.acquire()
-                        self.light_cmd_buffer.append("off")
-                        self.light_cmd_buffer_lock.release()
+        except Exception as e:
+            print(e)
     
 
 
