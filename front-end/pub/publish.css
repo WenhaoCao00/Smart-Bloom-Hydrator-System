@@ -122,7 +122,7 @@ button:hover {
 .form-row > textarea {
   font-size: 1.5em;
   background-color: rgb(242, 248, 248);
-  text-align: center;
+  text-align: left;
   font-weight: bold;
 }
 .btn-container {
@@ -131,7 +131,7 @@ button:hover {
   display: flex;
 }
 .btn-container > button {
-  width: 50%;
+  width: 100%;
   border: 0;
   box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
   border-radius: 10px;

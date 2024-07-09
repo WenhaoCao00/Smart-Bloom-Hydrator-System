@@ -9,7 +9,7 @@
   </head>
   <body>
     <div class="container">
-      <div class="left-panel">
+      <div class="left-panel"> 
         <h1>Update Configuration</h1>
         <div class="config-form">
           <label for="max_temp">Max Temperature (°C):</label>
@@ -64,12 +64,15 @@
           <h1>Record History</h1>
           <ul class="wrapper">
             <li class="form-row">
-              <label for="payload">Payload</label>
+              <label for="payload">Request Form</label>
               <input type="text" id="payload" placeholder="config, actuator_record, sensor_record, sunrise" />
             </li>
             <li class="form-row">
               <label for="message">Record</label>
               <textarea id="message" name="message" rows="10" readonly></textarea>
+ 
+
+
             </li>
             <li class="form-row">
               <label for="status">Status</label>
@@ -77,8 +80,7 @@
             </li>
             <li class="form-row">
               <div class="btn-container">
-                <button type="button" id="subscribe">Subscribe</button>
-                <button type="button" id="unsubscribe">Unsubscribe</button>
+                <button type="button" id="subscribe">Request</button>
               </div>
             </li>
         </div>

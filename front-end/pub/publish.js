@@ -47,17 +47,17 @@ window.addEventListener("load", (event) => {
     publishAndSubscribeToTopic();
   });
 
-  const unsubscribeBtn = document.querySelector("#unsubscribe");
-  unsubscribeBtn.addEventListener("click", function () {
-    unsubscribeToTopic();
-  });
+  // const unsubscribeBtn = document.querySelector("#unsubscribe");
+  // unsubscribeBtn.addEventListener("click", function () {
+  //   unsubscribeToTopic();
+  // });
 });
 
 function connectToBroker() {
   const clientId = "client" + Math.random().toString(36).substring(7);
 
   // Change this to point to your MQTT broker
-  const host = "ws://192.168.0.101:8080";
+  const host = "ws://192.168.0.103:8080";
 
   const options = {
     keepalive: 60,
@@ -95,12 +95,18 @@ function connectToBroker() {
       // Clear the text area for last message
       messageTextArea.value = "";
       messageTextArea.value += `Table Name: ${tableName}\n`;
+      messageTextArea.value += "\n";
 
       dataList.forEach((dataItem, index) => {
         messageTextArea.value += `Data ${index + 1}:\n`;
         for (const [key, value] of Object.entries(dataItem)) {
-          messageTextArea.value += `  ${key}: ${value}\n`;
+          if (key === "id") {
+            continue;
+          } else {
+            messageTextArea.value += `${key}: ${value}\n`;
+          }
         }
+        messageTextArea.value += "\n";
       });
       messageTextArea.value += "\n";
     } catch (e) {
@@ -108,10 +114,6 @@ function connectToBroker() {
       const messageTextArea = document.querySelector("#message");
       messageTextArea.value += "Received invalid JSON message.\n";
     }
-
-    console.log(
-      "Received Message: " + message.toString() + "\nOn topic: " + topic
-    );
   });
 }
 
@@ -121,8 +123,9 @@ function publishConfig() {
     min_temp: parseFloat(document.querySelector("#min_temp").value),
     max_mois: parseFloat(document.querySelector("#max_mois").value),
     min_mois: parseFloat(document.querySelector("#min_mois").value),
-    enough_light_time:
-      parseFloat(document.querySelector("#enough_light_time").value) * 60,
+    enough_light_time: parseFloat(
+      document.querySelector("#enough_light_time").value
+    ),
     single_water_time: parseFloat(
       document.querySelector("#single_water_time").value
     ),
@@ -188,14 +191,19 @@ function publishAndSubscribeToTopic() {
       });
     }
   });
+  // Unsubscribe after 5 seconds
+  setTimeout(() => {
+    console.log(`Unsubscribing from Topic: ${subTopic}`);
+    mqttClient.unsubscribe(subTopic, { qos: 0 });
+  }, 5000);
 }
 
-function unsubscribeToTopic() {
-  const status = document.querySelector("#status");
-  const subTopic = "db_data";
-  console.log(`Unsubscribing to Topic: ${subTopic}`);
+// function unsubscribeToTopic() {
+//   const status = document.querySelector("#status");
+//   const subTopic = "db_data";
+//   console.log(`Unsubscribing to Topic: ${subTopic}`);
 
-  mqttClient.unsubscribe(subTopic, { qos: 0 });
-  status.style.color = "red";
-  status.value = "UNSUBSCRIBED";
-}
+//   mqttClient.unsubscribe(subTopic, { qos: 0 });
+//   status.style.color = "red";
+//   status.value = "UNSUBSCRIBED";
+// }

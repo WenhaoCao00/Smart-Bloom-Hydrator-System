@@ -14,7 +14,7 @@ client = mqtt.Client()
 #client.on_message = on_message
 
 # 连接到本地MQTT Broker
-client.connect('192.168.0.101', 1883, 60)
+client.connect('192.168.0.103', 1883, 60)
 
 # 发布消息
 def publish(topic, payload):
@@ -32,4 +32,4 @@ data = json.dumps(data)
 while True:
 
     publish("db_data", data)
-    time.sleep(10)
+    time.sleep(3)
