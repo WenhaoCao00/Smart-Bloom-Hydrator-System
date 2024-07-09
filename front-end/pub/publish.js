@@ -44,7 +44,7 @@ function connectToBroker() {
   const clientId = "client" + Math.random().toString(36).substring(7);
 
   // Change this to point to your MQTT broker
-  const host = "ws://192.168.0.100:8080";
+  const host = "ws://192.168.0.101:8080";
 
   const options = {
     keepalive: 60,
@@ -79,6 +79,8 @@ function connectToBroker() {
       const dataList = msg.data;
 
       const messageTextArea = document.querySelector("#message");
+      // Clear the text area for last message
+      messageTextArea.value = "";
       messageTextArea.value += `Table Name: ${tableName}\n`;
 
       dataList.forEach((dataItem, index) => {
@@ -136,6 +138,18 @@ function publishAndSubscribeToTopic() {
   const pubTopic = "get_db";
   const subTopic = "db_data";
   const payload = document.querySelector("#payload").value.trim();
+  //check if the payload is in [“config”, “actuator_record”, “sensor_record”, “sunrise”]
+  if (
+    payload !== "config" &&
+    payload !== "actuator_record" &&
+    payload !== "sensor_record" &&
+    payload !== "sunrise"
+  ) {
+    console.error("Invalid payload");
+    status.style.color = "red";
+    status.value = "INVALID PAYLOAD";
+    return;
+  }
 
   // Subscribe to the topic first to ensure we don't miss any messages
   console.log(`Subscribing to Topic: ${subTopic}`);
