@@ -172,16 +172,17 @@ class AIPlanner:
                     print("actuator publish: {}".format(msg))
 
         
-    def check_lightTime_enough_or_not_for_init_state(self):
+    def check_lightTime_enough_or_not_for_init_state(self, light_sensor_value):
         self.config_lock.acquire()
         enough_light_time = self.config["enough_light_time"]
+        light_value_threshold = 100
         self.config_lock.release()
 
         now_time = datetime.datetime.now()
         today_datestring = now_time.strftime("%d.%m.%Y")
-        if self.sunrise_data_date == today_datestring:
-            return 
-        self.sunrise_data_date, self.sunrise_time, self.sunset_time = self.db_handler.get_today_sun_data()
+        if self.sunrise_data_date != today_datestring:
+            self.sunrise_data_date, self.sunrise_time, self.sunset_time = self.db_handler.get_today_sun_data()
+        
         if self.sunrise_data_date is not None:
             if now_time > self.sunrise_time and now_time < self.sunset_time:
                 return True # if there is sun light, no need to consider light time
@@ -189,7 +190,11 @@ class AIPlanner:
         if self.accummulate_light_time > enough_light_time:
             return True
         else:
-            return False
+            if light_sensor_value > light_value_threshold:
+                # if environment is bright enought, no need to consider light time
+                return True
+            else:
+                return False
 
 
     def check_trigger_or_not(self):
@@ -229,7 +234,7 @@ class AIPlanner:
                 # generate init statement
                 self.pddl_pb._init_list = [self.pddl_pb.light_is_off(self.pddl_pb.lights[1])]
                 # generate light condition
-                if self.check_lightTime_enough_or_not_for_init_state():
+                if self.check_lightTime_enough_or_not_for_init_state(data["Illuminance"]):
                     self.pddl_pb._init_list.append(self.pddl_pb.lightTime_is_enough(self.pddl_pb.lightTimes[1]))
                 
                 sensor_temp = data["Air Temperature"]
@@ -261,7 +266,7 @@ class AIPlanner:
                     solution_path = os.path.join(now_path, "problem.pddl.soln")
                     with open(solution_path, 'r')as f:
                         solution = f.readlines()
-                    # os.remove(solution_path)
+                    os.remove(solution_path)
                     print(solution)
                 else:
                     print("No solution file")
@@ -269,20 +274,29 @@ class AIPlanner:
                 if solution != None:
                     self.set_last_trigger_time()
                     # stored into sending buffer
+                    has_light_flag = False
                     for single_cmd in solution:
                         if "light-on" in single_cmd:
                             self.light_cmd_buffer_lock.acquire()
                             self.light_cmd_buffer.append("on")
                             self.light_cmd_buffer_lock.release()
+                            has_light_flag = True
                         elif "light-off" in single_cmd or "light-keep-off" in single_cmd:
                             self.light_cmd_buffer_lock.acquire()
                             self.light_cmd_buffer.append("off")
                             self.light_cmd_buffer_lock.release()
+                            has_light_flag = True
                         elif "water" in single_cmd:
                             self.water_cmd_buffer_lock.acquire()
                             self.water_cmd_buffer.append("on")
                             self.water_cmd_buffer.append("off")
                             self.water_cmd_buffer_lock.release()
+                    
+                    if not has_light_flag:
+                        # if there is no light command from AIPlanner, turn off the light to match the assumption
+                        self.light_cmd_buffer_lock.acquire()
+                        self.light_cmd_buffer.append("off")
+                        self.light_cmd_buffer_lock.release()
     
 
 
