@@ -17,7 +17,7 @@ window.addEventListener("load", (event) => {
 function connectToBroker() {
   const clientId = "client" + Math.random().toString(36).substring(7);
 
-  const host = "ws://192.168.0.100:8080";
+  const host = "ws://192.168.3.51:8080";
 
   const options = {
     keepalive: 60,
